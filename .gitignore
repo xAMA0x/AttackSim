@@ -33,6 +33,7 @@ wheels/
 # Reports
 reports/*.png
 reports/*.jpg
+!reports/.gitkeep
 
 # OS
 .DS_Store
