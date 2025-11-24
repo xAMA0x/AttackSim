@@ -1,0 +1,3 @@
+"""
+DES Attack Module
+"""

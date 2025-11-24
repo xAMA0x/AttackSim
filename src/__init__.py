@@ -1,0 +1,3 @@
+"""
+Crypto Simulator - Package principal
+"""
