@@ -25,7 +25,7 @@ def main():
         main_menu = {
             "1": "🔐 Attaques Symétrique (DES, AES)",
             "2": "🔑 Attaques Asymétrique (RSA, ECC)",
-            "3": "⏱️  Attaques Spéciales (Timing)",
+            "3": "⏱️ Attaques Spéciales (Timing)",
             "0": "❌ Quitter"
         }
         
