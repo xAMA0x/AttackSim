@@ -125,8 +125,9 @@ def brute_force_aes(ciphertext: bytes, plaintext: bytes, key_bits: int,
     
     # Génère toutes les clés possibles
     for key_int in range(max_keys_to_test):
-        # Convertit l'entier en octets (clé 16 octets avec zéros au début)
-        key_bytes = key_int.to_bytes(16, byteorder='big')
+        # Convertit l'entier en octets de longueur minimale, puis pad à 16 octets
+        key_bytes = key_int.to_bytes((key_bits + 7) // 8, 'big')
+        key_bytes = key_bytes.ljust(16, b'\x00')[:16]
         
         # Tente de déchiffrer
         decrypted = decrypt_aes(ciphertext, key_bytes)
@@ -176,7 +177,9 @@ def brute_force_aes_with_progress(ciphertext: bytes, plaintext: bytes, key_bits:
         task = progress.add_task(f"[yellow]Test de {format_number(max_keys_to_test)} clés...", total=max_keys_to_test)
         
         for key_int in range(max_keys_to_test):
-            key_bytes = key_int.to_bytes(16, byteorder='big')
+            # Convertit l'entier en octets de longueur minimale, puis pad à 16 octets
+            key_bytes = key_int.to_bytes((key_bits + 7) // 8, 'big')
+            key_bytes = key_bytes.ljust(16, b'\x00')[:16]
             
             decrypted = decrypt_aes(ciphertext, key_bytes)
             keys_tested += 1
@@ -544,15 +547,17 @@ def get_validated_secret_key() -> bytes:
             
             # ✅ Secret valide - Convertit en clé AES
             console.print(f"[green]✓ Secret validé ({input_type}): {secret_value:,}[/green]")
-            
+
             # Convertit l'entier en clé AES de 16 octets
-            # Place le secret à la FIN avec padding de zéros au DÉBUT
-            # Cela garantit que la clé reste dans l'intervalle [0, 2^22]
-            key_bytes = secret_value.to_bytes(16, byteorder='big')
-            
-            console.print(f"[cyan]Clé AES (hex): {key_bytes.hex()}[/cyan]")
-            console.print(f"[cyan]Clé (16 octets): {key_bytes}[/cyan]\n")
-            
+            # Place le secret à GAUCHE (octets de poids fort), pad à droite avec des zéros
+            byte_len = (secret_value.bit_length() + 7) // 8
+            if byte_len == 0:
+                byte_len = 1
+            key_bytes = secret_value.to_bytes(byte_len, byteorder='big')
+            key_bytes = key_bytes.ljust(16, b'\x00')[:16]
+
+            console.print(f"[cyan]Clé AES (hex): {key_bytes.hex()}[/cyan]\n")
+
             return key_bytes
         
         except ValueError:
