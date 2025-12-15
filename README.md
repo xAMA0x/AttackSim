@@ -2,6 +2,37 @@
 
 Simulateur d'attaques cryptographiques - Projet ESGI
 
+## 🚀 Installation et Configuration
+
+### 1. Prérequis
+- Python 3.8+ 
+- Git
+
+### 2. Installation rapide
+```bash
+# Cloner le dépôt
+git clone <URL_DU_REPO>
+cd AttackSim
+
+# Configuration automatique (recommandé)
+python setup.py
+
+# OU installation manuelle :
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 3. Lancement
+```bash
+python main.py
+```
+
+### 4. Structure des dossiers
+- `data/` - Fichiers d'entrée utilisateur (mots, paramètres RSA, etc.)
+- `reports/` - Rapports et graphiques générés automatiquement
+- `src/` - Code source du simulateur
+
 ## 🎯 Description
 
 Application CLI interactive permettant de simuler différentes attaques cryptographiques sur des algorithmes de chiffrement symétrique et asymétrique.

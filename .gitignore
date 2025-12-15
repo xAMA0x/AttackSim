@@ -33,7 +33,16 @@ wheels/
 # Reports
 reports/*.png
 reports/*.jpg
+reports/*.md
 !reports/.gitkeep
+
+# User data files (keep examples)
+data/my_*
+data/*.tmp
+!data/exemple_*
+!data/rsa_params.txt
+!data/README.md
+!data/.gitkeep
 
 # OS
 .DS_Store
