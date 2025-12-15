@@ -8,6 +8,20 @@ from pathlib import Path
 # Ajout du chemin src/ au PYTHONPATH
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
+# Configuration automatique de l'environnement
+try:
+    from config import configure_matplotlib, ensure_directories, check_permissions
+    configure_matplotlib()
+    ensure_directories()
+    if not check_permissions():
+        print("❌ Erreur: Permissions d'écriture insuffisantes")
+        print("Vérifiez les permissions des dossiers data/ et reports/")
+        sys.exit(1)
+except ImportError:
+    # Si le fichier config.py n'existe pas, utilise les valeurs par défaut
+    import matplotlib
+    matplotlib.use('Agg')  # Backend sûr par défaut
+
 from core import ui
 from attacks.symmetric import des_attack, aes_attack
 from attacks.asymmetric import rsa_attack, ecc_attack

@@ -3,3 +3,7 @@ matplotlib>=3.7.0
 numpy>=1.24.0
 typer>=0.9.0
 pycryptodome>=3.19.0
+scipy>=1.10.0
+seaborn>=0.12.0
+tinyec>=0.4.0
+sympy>=1.11.0
