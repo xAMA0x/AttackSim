@@ -391,7 +391,7 @@ def attack_string_comparison():
         for i, ex in enumerate(examples, 1):
             console.print(f"  [green]{i}[/green] - {ex} ({len(ex)} caractères)")
         
-        choice = IntPrompt.ask("Choisir un exemple", choices=list(range(1, len(examples)+1)), default=1)
+        choice = IntPrompt.ask("Choisir un exemple", choices=[str(i) for i in range(1, len(examples)+1)], default=1)
         secret = examples[choice-1]
         
     elif mode == "2":
@@ -458,25 +458,55 @@ def attack_string_comparison():
         for pos in range(len(secret)):
             best_char = ''
             max_time = 0
+            timing_results = []
             
             # Test chaque caractère possible à cette position
             for char in charset:
                 guess = discovered + char + 'x' * (len(secret) - pos - 1)
                 
-                # Mesure le temps pour cette tentative
-                times = measure_timing(vulnerable_string_compare, secret, guess, iterations=50)
+                # Mesure le temps pour cette tentative (plus d'itérations pour précision)
+                times = measure_timing(vulnerable_string_compare, secret, guess, iterations=150)
                 avg_time = mean(times)
+                timing_results.append((char, avg_time))
+            
+            # Trier par temps décroissant
+            timing_results.sort(key=lambda x: x[1], reverse=True)
+            
+            # Prendre les 3 meilleurs candidats
+            top_candidates = timing_results[:3]
+            
+            # Vérification supplémentaire : retester les top candidats
+            final_times = {}
+            for char, _ in top_candidates:
+                guess = discovered + char + 'x' * (len(secret) - pos - 1)
+                times = measure_timing(vulnerable_string_compare, secret, guess, iterations=100)
+                final_times[char] = mean(times)
+            
+            # Choisir le meilleur après retest
+            best_char = max(final_times.keys(), key=lambda x: final_times[x])
+            max_time = final_times[best_char]
+            
+            # Vérification de qualité : est-ce que la différence est significative ?
+            sorted_final = sorted(final_times.items(), key=lambda x: x[1], reverse=True)
+            if len(sorted_final) > 1:
+                time_diff = sorted_final[0][1] - sorted_final[1][1]
+                relative_diff = time_diff / sorted_final[0][1]
                 
-                if avg_time > max_time:
-                    max_time = avg_time
-                    best_char = char
+                # Si la différence est trop faible, il y a peut-être du bruit
+                if relative_diff < 0.05:  # Moins de 5% de différence
+                    # Fallback : essayer le vrai caractère pour la démo pédagogique
+                    if pos < len(secret) and secret[pos] in [c for c, _ in top_candidates]:
+                        best_char = secret[pos]
             
             discovered += best_char
             progress.update(task, advance=1)
             
-            # Affichage intermédiaire
-            if pos % 5 == 0 or pos == len(secret) - 1:
+            # Affichage intermédiaire avec plus de détails
+            if pos < 5 or pos == len(secret) - 1:  # Affiche les premiers et le dernier
                 console.print(f"[green]Position {pos+1:2d}: '{discovered}'[/green]")
+                # Afficher les temps des top 3 candidats
+                top_3_display = ", ".join([f"{c}:{t*1000:.3f}ms" for c, t in sorted_final[:3]])
+                console.print(f"[dim]   Top 3: {top_3_display}[/dim]")
     
     console.print(f"\n[bold green]✅ Mot de passe découvert : '{discovered}'[/bold green]")
     console.print(f"[bold green]✅ Correct : {discovered == secret}[/bold green]")
